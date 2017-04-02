@@ -1,0 +1,38 @@
+<?php include 'connect_beemon_bd.php';?>
+
+<?php
+session_start();
+error_reporting(0);
+if(isset($_POST))
+{
+	$user =htmlentities(trim($_POST['username']));
+	$pass =htmlentities(trim($_POST['password'])); 
+
+	if($user&&$pass)
+	{
+		$pass = md5($pass);
+		$query= "SELECT * FROM `utilisateur` WHERE username='" . $user . "'&&password='" . $pass . "'";
+		$result = $mysqli->query($query) or die($mysqli->error.__LINE__);
+		
+		if($result->num_rows > 0) {
+			while($row = $result->fetch_assoc()) {
+				$id_user=$row['id_user'];
+				$_SESSION['id_user_s']=$id_user;
+				$username=$row['username'];
+				$_SESSION['username']=$username;
+				echo "bienvenue  ".$_SESSION['username'];
+			}
+		}
+		else
+		{
+			session_destroy();
+			echo "wrong";
+		}		
+	}
+	else
+	{
+		echo "Please fill all fields";
+	}
+}
+
+?>

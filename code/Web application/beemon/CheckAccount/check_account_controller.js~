@@ -1,0 +1,38 @@
+function js_log(command)
+{
+	var xmlhttp;
+	if (window.XMLHttpRequest)
+	{
+		xmlhttp=new XMLHttpRequest();
+	}
+	else
+	{
+		xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+	}
+"SELECT  ruche_desc FROM ruche_equipee AS p1, relaye AS p2 ,relais_groupe AS p3 WHERE p1.id_ruche = p2.fk_id_ruche AND p3.id_groupe = p2.fk_id_groupe AND p2.fk_id_groupe =$id_groupe";
+	switch(command) {
+	case "log_in":
+		xmlhttp.open("POST","./CheckAccount/check_account_model.php",true);
+		xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+		xmlhttp.send("username="+document.forms["logForm"].elements["username"].value+"&"+"password="+document.forms["logForm"].elements["password"].value);
+
+
+
+		break;
+	case "log_out":
+		xmlhttp.open("POST","./CheckAccount/logout.php",true);
+		xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+		xmlhttp.send();
+		break;
+	}
+
+	xmlhttp.onreadystatechange=function()
+	{
+		if (xmlhttp.readyState==4 && xmlhttp.status==200)
+		{
+			document.getElementById("log_rsp").innerHTML=xmlhttp.responseText;
+		}
+	}
+}
+
+

@@ -1,0 +1,481 @@
+#  						SSI_CODE_R1 NETTOYE ET COMMENTE
+# Auteur:Gerstein Liam			Date:08.5.14
+# Liste de commande supporté: Voir fichier dans même dossier
+# Compilation: Voir section dans rapport
+#******************************************************************************
+
+
+dim V_PS(32)
+dim PS_KEYS_CONFIGURED
+dim GATT_KEYS_CONFIGURED
+
+dim GATT_KEYS_SSI_DESC(3)
+dim PS_KEYS_SSI_DESC(6)
+
+dim GATT_KEYS_SSI_CONF(3)
+dim PS_KEYS_SSI_CONF(6)
+dim NumberOfConf
+
+dim F_Inter_Conf
+dim F_Acquisition
+dim Compteur_Acquisition
+dim Compteur_Interaction
+
+dim GATT_KEYS_PORT_CONF(3)
+dim PS_KEYS_PORT_CONF(6)
+dim GATT_DEPT_KEYS(6)
+
+dim Nombre_port
+dim i
+dim p
+
+dim ContextSSI(12)
+
+dim Adv_data(13)
+dim NatureProp
+dim Time_Out
+dim Adv_Enable
+
+dim ContextBLE(4)
+dim Connected
+
+dim Handle
+dim Offset
+dim Result
+dim Value_len
+dim Value_data(32)
+
+dim written
+dim resulte
+dim i2c_data
+dim i2c_dl
+dim Offset_gatt
+dim Tampon1_full
+
+dim Valeur
+dim Valeur_Imprimable(6)
+dim Dizaine
+dim Unite
+dim Flottant
+#*************************************************************************************
+#******************************Mappage PS et GATT*******""""""""""""""""**************
+procedure MappageConfiguration()
+# On va définir ici les clès Gatt  et PS pour la description et la configuration du SSI
+#ainsi que les tampon de collecte qui se trouve dans la Gatt uniquement.
+#Le stockage dans la PS est  la pour garantir la préservation de la configuration
+#Le stockage dans la Gatt est pour mettre a dispositon toutes les informations de configurations
+#Lier les deux permet de faire passer les informations de la Gatt au PS facilement
+
+
+PS_KEYS_CONFIGURED=$8000  	  # Status de configuration : Configuré/non configuré
+GATT_KEYS_CONFIGURED=$70
+
+PS_KEYS_SSI_DESC(0:2)=$8001	      #Nom SSI
+GATT_KEYS_SSI_DESC(0:1)=3		
+PS_KEYS_SSI_DESC(2:2)=$8003	      #Groupe
+
+PS_KEYS_SSI_DESC(4:2)=$8004	      #SousGroupe
+
+PS_KEYS_SSI_CONF(0:2)= $8005      #Heure dernier dépot 
+GATT_KEYS_SSI_CONF(0:1)=13	  
+PS_KEYS_SSI_CONF(2:2)= $8006      #Frequence Proposition interaction/configuration
+GATT_KEYS_SSI_CONF(1:1)=16
+PS_KEYS_SSI_CONF(4:2)= $8007      #Frequence de collecte
+GATT_KEYS_SSI_CONF(2:1)=19
+NumberOfConf=3
+
+PS_KEYS_PORT_CONF(0:2)= $8008      #Configuration port 1
+GATT_KEYS_PORT_CONF(0:1)=23
+PS_KEYS_PORT_CONF(2:2)= $8009  	   #Configuration port 2
+GATT_KEYS_PORT_CONF(1:1)=36
+PS_KEYS_PORT_CONF(4:2)= $8010  	   #Configuration port 3
+GATT_KEYS_PORT_CONF(2:1)=45
+
+GATT_DEPT_KEYS(0:1)=29		  	   #Port 1 -> Tampon 1
+GATT_DEPT_KEYS(1:1)=32		  	   #Port 1 -> Tampon 2
+GATT_DEPT_KEYS(2:1)=42         	   #Port 2 -> Tampon 1
+GATT_DEPT_KEYS(3:1)=45		       #Port 2 -> Tampon 2
+GATT_DEPT_KEYS(4:1)=55		       #Port 3 -> Tampon 1
+GATT_DEPT_KEYS(5:1)=58		       #Port 3 -> Tampon 2
+
+
+end
+#*************************************************************************************
+#******************************Initialisation de la configuration*********************
+procedure InitiationSSI()
+
+# Ici on passe principalement les configurations se trouvant dans la mémoire aux variables de fonctionnement
+# mais également dans la Gatt. Le titre de la routine pourrait donc prendre éventuellement un autre nom
+
+
+call flash_ps_load(PS_KEYS_SSI_DESC(0:2))(Result, Value_len, Value_data(0:Value_len)) 
+call attributes_write(GATT_KEYS_SSI_DESC(0:1), 0, Value_len, Value_data(0:Value_len))	
+
+call flash_ps_load(PS_KEYS_SSI_CONF(0:2))(Result, Value_len, Value_data(0:Value_len)) 
+call attributes_write(GATT_KEYS_SSI_CONF(0:1), 0, Value_len, Value_data(0:Value_len))
+F_Depot=Value_data(0:Value_len)
+call flash_ps_load(PS_KEYS_SSI_CONF(2:2))(Result, Value_len, Value_data(0:Value_len)) 
+call attributes_write(GATT_KEYS_SSI_CONF(1:1), 0, Value_len, Value_data(0:Value_len))
+F_Inter_Conf=Value_data(0:Value_len)
+call flash_ps_load(PS_KEYS_SSI_CONF(4:2))(Result, Value_len, Value_data(0:Value_len)) 
+call attributes_write(GATT_KEYS_SSI_CONF(2:1), 0, Value_len, Value_data(0:Value_len))
+F_Acquisition=Value_data(0:Value_len)
+
+call flash_ps_load(PS_KEYS_PORT_CONF(0:2))(Result, Value_len, Value_data(0:Value_len)) 
+call attributes_write(GATT_KEYS_PORT_CONF(0:1), 0, Value_len, Value_data(0:Value_len))
+call flash_ps_load(PS_KEYS_PORT_CONF(2:2))(Result, Value_len, Value_data(0:Value_len)) 
+call attributes_write(GATT_KEYS_PORT_CONF(1:1), 0, Value_len, Value_data(0:Value_len))
+call flash_ps_load(PS_KEYS_PORT_CONF(2:2))(Result, Value_len, Value_data(0:Value_len)) 
+call attributes_write(GATT_KEYS_PORT_CONF(2:1), 0, Value_len, Value_data(0:Value_len))
+
+end
+
+
+#*************************************************************************************
+#******************************Stockage et mise a jour de la configuration************
+procedure Update_Configuration()
+
+# Ici on passe principalement les configurations se trouvant dans  la Gatt, qui viennent d'être modifiées par l'utilisateur
+#à la mémoire Flash et aux variables de fonctionnement
+
+# Remarque: On pourrait coder autrement en utilisant des boucles
+call attributes_read(GATT_KEYS_SSI_DESC(0:1), 0)(Handle, Offset, Result, Value_len, Value_data(0:Value_len))	#KO
+call flash_ps_save(PS_KEYS_SSI_DESC(0:2), Value_len,  Value_data(0:Value_len))
+
+call attributes_read(GATT_KEYS_SSI_CONF(0:1), 0)(Handle, Offset, Result, Value_len, Value_data(0:Value_len))	#KO
+call flash_ps_save(PS_KEYS_SSI_CONF(0:2), Value_len,  Value_data(0:Value_len))
+F_Depot=Value_data(0:Value_len)
+call attributes_read(GATT_KEYS_SSI_CONF(1:1), 0)(Handle, Offset, Result, Value_len, Value_data(0:Value_len))	#KO
+call flash_ps_save(PS_KEYS_SSI_CONF(2:2), Value_len,  Value_data(0:Value_len))
+F_Inter_Conf=Value_data(0:Value_len)
+call attributes_read(GATT_KEYS_SSI_CONF(2:1), 0)(Handle, Offset, Result, Value_len, Value_data(0:Value_len))	#KO
+call flash_ps_save(PS_KEYS_SSI_CONF(4:2), Value_len,  Value_data(0:Value_len))
+F_Acquisition=Value_data(0:Value_len)
+
+call attributes_read(GATT_KEYS_PORT_CONF(0:1), 0)(Handle, Offset, Result, Value_len, Value_data(0:Value_len))	#KO
+call flash_ps_save(PS_KEYS_PORT_CONF(0:2), Value_len,  Value_data(0:Value_len))
+call attributes_read(GATT_KEYS_PORT_CONF(1:1), 0)(Handle, Offset, Result, Value_len, Value_data(0:Value_len))	#KO
+call flash_ps_save(PS_KEYS_PORT_CONF(2:2), Value_len,  Value_data(0:Value_len))
+call attributes_read(GATT_KEYS_PORT_CONF(2:1), 0)(Handle, Offset, Result, Value_len, Value_data(0:Value_len))	#KO
+call flash_ps_save(PS_KEYS_PORT_CONF(4:2), Value_len,  Value_data(0:Value_len))
+
+end
+
+#*************************************************************************************
+#******************************Affichage pour debugging*******************************
+procedure LCD_Conf()
+call hardware_io_port_write(1,$7,$1)
+call hardware_io_port_config_direction(1,$7)
+#initialize the display
+call hardware_spi_transfer(0,11,"\x30\x30\x30\x39\x14\x56\x6d\x70\x0c\x06\x01")
+# Change display cursor pos
+call hardware_spi_transfer(0,1,"\x80")
+#set the display to data mode
+call hardware_io_port_write(1,$7,$3)
+#Write Valeur to display
+call hardware_spi_transfer(0,5,ContextSSI(0:5))
+
+
+call hardware_io_port_write(1,$7,$1)
+call hardware_spi_transfer(0,1,"\x87")
+call hardware_io_port_write(1,$7,$3)
+call hardware_spi_transfer(0,2,"B:")
+call hardware_io_port_write(1,$7,$1)
+call hardware_spi_transfer(0,1,"\x89")
+call hardware_io_port_write(1,$7,$3)
+call hardware_spi_transfer(0,4,ContextBLE(0:4))
+
+call hardware_io_port_write(1,$7,$1)
+call hardware_spi_transfer(0,1,"\xc0")
+call hardware_io_port_write(1,$7,$3)
+call hardware_spi_transfer(0,2,"FA:")
+call hardware_io_port_write(1,$7,$1)
+call hardware_spi_transfer(0,1,"\xc2")
+call hardware_io_port_write(1,$7,$3)
+call hardware_spi_transfer(0,1,(F_Acquisition+48))
+
+
+call hardware_io_port_write(1,$7,$1)
+call hardware_spi_transfer(0,1,"\xc5")
+call hardware_io_port_write(1,$7,$3)
+call hardware_spi_transfer(0,2,"FI:")
+call hardware_io_port_write(1,$7,$1)
+call hardware_spi_transfer(0,1,"\xc7")
+call hardware_io_port_write(1,$7,$3)
+call hardware_spi_transfer(0,1,(F_Inter_Conf+48))
+
+
+call hardware_io_port_write(1,$7,$1)
+call hardware_spi_transfer(0,1,"\xc9")
+call hardware_io_port_write(1,$7,$3)
+call hardware_spi_transfer(0,2,"V:")
+call hardware_io_port_write(1,$7,$1)
+call hardware_spi_transfer(0,1,"\xcb")
+call hardware_io_port_write(1,$7,$3)
+call hardware_spi_transfer(0,6,Valeur_Imprimable(0:6))
+end
+
+#*************************************************************************************
+#******************************CreationAnnonce****************************************
+procedure CreateAdvert()
+if Connected=0 then
+	Adv_data(0:1) = $02 # ad field length = 2 bytes
+	Adv_data(1:1) = gap_ad_type_flags   # ad field type = 0x01 (Flags)
+	Adv_data(2:1) = $06 # flags = 0x06, connectable/undirected
+
+	# tx power field advertisement, iOS apps may need this
+	Adv_data(3:1) = $02 # ad field length = 2 bytes
+	Adv_data(4:1) = gap_ad_type_txpower    # ad field type = 0x0A (TX Power)
+	Adv_data(5:1) = $03 # TX power in dBm
+	# NOTE: TX power is Dizaine signed 8-bit value, and is not changed automatically
+	# when using "hardware_set_txpower(<power>)". This may be anywhere from -23
+	# to +3 based on your settings. Negative values may be converted to two's
+	# complement form by adding 256, so for example -23 dBm would be 233 or $E9.
+
+	# custom manufacturer
+	Adv_data(6:1) = $06 # ad field length = 5 bytes (arbitrary, maybe more or less but minimum 3)
+	Adv_data(7:1) = $ff # ad field type = 0xFF (Manufacturer Specific Data)
+	Adv_data(8:1) = $ff # unknown/prototype Company Identifier Code - octet 2 
+	Adv_data(9:1) = $ff # unknown/prototype Company Identifier Code - octet 1 
+	call gap_set_mode(gap_general_discoverable,gap_directed_connectable)
+	
+	# Pas utilisé
+	Adv_data(10:1) = $00
+	# 0x AD-> Depot || 0x AA-> Alerte Probleme || oXFF -> CreateAdvert interaction || Configuration ox00
+	Adv_data(11:1) = NatureProp 
+	# Numero du capteur posant problème
+	Adv_data(12:1) = $00 
+	call gap_set_adv_data(0, 13, Adv_data(0:13))
+end if
+end
+
+
+
+#*************************************************************************************
+#******************************Routine capteur HIH6121********************************
+procedure HIH6121_TemperatureHumidity (selector)
+#(Adresse I2C* pour passer de 7 a 8 bit , envoie d'un stop)
+call hardware_i2c_write(78,1,0,0)(written)							
+call hardware_i2c_read(78,1,4)(resulte,i2c_dl,i2c_data)
+				
+#Si l'etiquette contient TE, on mesure la température
+if Value_data(4:2) ="TE"then										
+	#On extrait les bits correspondant a la température
+	Valeur  = (((i2c_data >> 16) & $ff) << 8) | ((i2c_data >> 24) & $ff)
+	#On calcul la valeur réel
+	Valeur= ((Valeur*165*10)/(16382*4))-(40*10)
+	#On ajoute le bon signe %
+	Valeur_Imprimable(4:1) = 67	    #"Flottant"
+end if
+#Si l'etiquette contient HU, on mesure l'humidité
+if Value_data(4:2) ="HU"then										
+	Valeur= ((i2c_data & $ff) << 8)|((i2c_data >> 8) & $ff)	
+	Valeur= ((Valeur*10*100)/(16382*4))
+	Valeur_Imprimable(4:1) = 37	    #"%"
+end if
+#On extrait les dizaine,unité et flottant puis on crée une valeur 
+#Affichable
+Dizaine = (Valeur/ 100)						#2X.X
+Unite = (Valeur/ 10) + (Dizaine*-10)			#X4.X
+Flottant = (Valeur)      + (Dizaine*-100) + (Unite*-10)	#XX.8
+Valeur_Imprimable(0:1) = Dizaine + 48 #"2"
+Valeur_Imprimable(1:1) = Unite + 48 #"4"
+Valeur_Imprimable(2:1) = 46	    #"."
+Valeur_Imprimable(3:1) = Flottant + 48 #"8"
+Valeur_Imprimable(5:1) = 32      #espace	
+end 
+
+
+#*************************************************************************************
+#******************************Collecte, stockage et gestion de dépot*****************
+procedure Collecte()
+p=0
+i=0
+Nombre_port=2
+#On regarde s'il faut enregistrer dans le premier ou second tampon
+if Tampon1_full=1 then
+	i=1
+end if
+
+# On traite tout les ports
+while Nombre_port>0		
+	# On extrait récupère l'étiquette du port courant
+	call flash_ps_load(PS_KEYS_PORT_CONF(p:2))(Result, Value_len, Value_data(0:Value_len))
+	# On vérifie que le port est utilisé
+	if Value_data(0:2)="US" then
+		# On regarde quel type de port il s'agit
+		if Value_data(2:2)="I2" then
+			# Capteur  I2C
+			# Pas fait, on regarde de quel capteur il s'agit
+			# Puis on appelle la routine correspondante
+			call HIH6121_TemperatureHumidity ()
+		end if
+		if Value_data(2:2)="AN" then
+			# Capteur  analogique
+			# Rien pour le moment
+		end if	
+		#Stockage de la valeur mesurée dans le tampon correspondant a ce port
+		call attributes_write( GATT_DEPT_KEYS(i:1) ,Offset_gatt,6,Valeur_Imprimable(0:6))
+	end if
+	i=i+2
+	p=p+2
+	Nombre_port=Nombre_port-1
+end while 
+
+Offset_gatt=Offset_gatt+6
+#Om test la charge du premier tampon
+#S'il est plein on ordonne au SSC de se connecter
+#Et on passe du tampon 1 au tampon 2
+if Offset_gatt>=36 then
+	Offset_gatt=0
+	if Tampon1_full=0 then
+		Tampon1_full=1
+		Adv_Enable=1
+		NatureProp=$dd
+		call CreateAdvert()
+		ContextSSI(0:4)="Depo" 
+		ContextBLE(0:4)="Prop" 
+	end if
+end if
+
+end
+#******************************InitialisationSSI******************************
+event system_boot(major ,minor ,patch ,build ,ll_version ,protocol_version ,hw )
+call MappageConfiguration()
+Connected=0
+Time_Out=10 
+Offset_gatt=0
+Adv_Enable=0
+Tampon1_full=0
+Nombre_port=2
+
+call gap_set_mode(0,0) # Power mode 3, BLE pas utilisé
+
+# On regarde si le SSI a déjà été configuré
+call flash_ps_load(PS_KEYS_CONFIGURED)(Result, Value_len, V_PS(0:4)) 
+# Si ce n'est pas le cas ,on ordonne au SSC de se connecter
+# Afin qu'il puisse configurer le SSI
+if V_PS(0:4)!= "DONE" then
+	ContextSSI(0:5)="NConf"
+	ContextBLE(0:4)="Prop"
+	call LCD_Conf()
+	NatureProp=$00
+	call  CreateAdvert()
+else
+# Si c'est cas ,on récupère la configuration stockée et 
+#on lance l'application
+	ContextSSI(0:5)="Confi"
+	ContextBLE(0:4)="Disc"
+	call LCD_Conf()
+	call InitiationSSI()
+	Compteur_Acquisition=0
+	Compteur_Interaction=0
+	# 2 Seconde pour mettre un message de présenter sur le LCD
+	call hardware_set_soft_timer(32768*2,0,0)  # Horloge Time_out
+end if
+end 
+#******************************Machine d'etat**********************************
+event hardware_soft_timer(handle)
+
+# Fin du message de présentation
+#Lancement de la machine d'état
+if handle=0 then
+	call hardware_set_soft_timer(0,0,0)  
+	call hardware_set_soft_timer(32768*5,1,0)  # Horloge Time_out
+end if
+
+#Horloge principal
+if handle=1 then
+	Compteur_Acquisition=Compteur_Acquisition+1
+	Compteur_Interaction=Compteur_Interaction+1
+
+	# On regarde si c'est le moment de collecter
+	if Compteur_Acquisition>=F_Acquisition then
+		ContextSSI(0:5)="Acqui"
+		Compteur_Acquisition=0
+		call Collecte()
+	end if
+	# On regarde si c'est le moment de proposer une connexion
+	if Compteur_Interaction>=F_Inter_Conf then
+		Compteur_Interaction=0
+		# On vérifie que l'on est pas déjà connecté 
+		# ou que le SSI n'envoie pas de proposition en ce moment
+		if Connected=0 & Adv_Enable=0 then
+			ContextBLE(0:4)="Prop"
+			# On envoie des advertissing du type "proposition de connexion direct" 
+			NatureProp=$cc
+			call  CreateAdvert()
+			Adv_Enable=1
+			#On stoppe l'horloge de la machine d'état pour lancer le Time
+			call hardware_set_soft_timer(0,1,0)  # Horloge Time_out
+			call hardware_set_soft_timer(32768/10,2,0)  # Horloge Time_out
+		end if
+	end if
+	call LCD_Conf()		
+end if
+
+# Horloge de TimeOut
+if handle=2 then
+	Time_Out=Time_Out-1
+	# Timeout expiré?
+	if Time_Out=0 then
+		Time_Out=10
+		# On arrete les advertising en stoppant le BLE
+		# et on entre a nouveau en power mode 3
+		call gap_set_mode(0,0)
+		ContextBLE(0:4)="   "
+		Adv_Enable=0
+		call LCD_Conf()	
+		# On stoppe l'horloge timeout et on remet la principal		
+		call hardware_set_soft_timer(0,2,0)  # Horloge Time_out
+		call hardware_set_soft_timer(32768*5,1,0)  # Horloge Time_out
+		# Remarque: Il faudrai soustraire le temps passée a advertiser 
+		# pour ne pas induire de décalage dans le temps
+	end if
+end if 
+end 
+#************************Interaction Et Configuration************************
+event attributes_value(connection, reason, handle, offset, value_len, value)
+
+
+#Signal que la configuration a été effectuée
+#On met a jour la configuration
+if handle=70 & value(0:4)="DONE" then	#Signal configuration effectuée
+	call flash_ps_save(PS_KEYS_CONFIGURED, value_len,  value(offset:value_len))
+	call Update_Configuration()
+	ContextSSI(0:5)="Confi"
+end if
+
+#Signal que le dépot à était effectuée
+#On repasse au tampon 1
+if handle=73 & value(0:4)="DEPD" then	
+	Offset_gatt=0
+	Tampon1_full=0
+end if
+end
+#************************Connexion etablit************************
+event connection_status(connection ,flags ,address ,address_type ,conn_interval ,timeout ,latency,bonding)
+
+Connected = 1
+Time_Out=10
+#On regarde si on est connecté a la suite du ordre ou d'une proposition
+if ContextBLE(0:4)="Prop" then
+	call hardware_set_soft_timer(0,2,0)  # Horloge Time_out
+	call hardware_set_soft_timer(32768*5,1,0)  # Horloge Time_out
+	# Meme remarque, il faudrait soustraire le Timeout a l'horloge principal
+	#Cependant ici la valeur a soustraire ne peut pas etre connu
+end if
+ContextBLE(0:4)="Conn"
+call LCD_Conf()
+end
+
+#************************Deconnexion************************
+event connection_disconnected(handle,result)	
+Connected=0
+Adv_Enable=0
+ContextBLE(0:4)="Disc"
+call LCD_Conf()
+ #On stoppe le BLE pour entrer PM3
+call gap_set_mode(0,0)
+end
+#************************EntréesAnalogique************************

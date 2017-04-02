@@ -1,0 +1,200 @@
+/////////////////////////////////////////////////////////////////////////////////////////
+//  Auteur: Gerstein Liam  (gerstein.liam@hotmail.com)
+//  Autorité: EIA-FR
+//  Date:23.6.2014           
+//////////////////////////////////////////////////////////////////////////////////////////
+//  fichier:gsm_controlleur.c
+//  Classe de pilotage du module GSM/GPRS SIM900
+//  a) Initialisation module (ouverture du port, PIN)
+//  b) Désactivation de l'écho provenant de la SIM900
+//  c) Envoie de commandes et traitement des réponses
+//  d) Fermeture du port série                    
+///////////////////////////////////////////////////////////////////////////////////////////
+
+#include "gsm_controlleur.h"
+#define DEBUG_GSM
+char bytes_to_read[1]={0};
+
+
+HANDLE hSerial;
+DCB dcbSerialParams = {0};
+COMMTIMEOUTS timeouts = {0};
+//*****************************Désactiver l'écho série du module SIM900*******************/////
+int disable_echo()
+{	DWORD bytes_written, total_bytes_written = 0;
+	//fprintf(stderr, "Sending bytes...");
+	if(!WriteFile(hSerial, "ATE0\r\n", 80, &bytes_written, NULL))
+	{
+		fprintf(stderr, "Error\n");
+		CloseHandle(hSerial);
+		return 1;
+	}
+	DWORD bytes_readed;
+	DWORD dwCommEvent;
+	while(WaitCommEvent(hSerial, &dwCommEvent, NULL)==0)
+	{
+	}
+	do{
+		if (ReadFile(hSerial,  // handle du port serie
+					bytes_to_read,               // tampon de lecture
+					1,              // nombre de byte voulu en une fois
+					&bytes_readed,  //  nombre de byte lu en une fois
+					NULL) == 0)              
+		{return FALSE;}
+		else
+		{}
+	}
+	while(bytes_readed!=0);
+	return 0;
+}	
+//*****************************Configuration et ouverture du port série*******************/////
+int init_gsm_serial()
+{
+	// Ouverture du port serie
+	fprintf(stderr, "Opening serial port...\n\n");
+	hSerial = CreateFile(
+	"\\\\.\\COM4", GENERIC_READ|GENERIC_WRITE, 0, NULL,
+	OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
+	if (hSerial == INVALID_HANDLE_VALUE)
+	{
+		fprintf(stderr, "Error\n");
+		return 1;
+	}
+	else fprintf(stderr, "\n");
+
+	//Configurer de la communication serie
+	dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
+	if (GetCommState(hSerial, &dcbSerialParams) == 0)
+	{
+		fprintf(stderr, "Error getting device state\n");
+		CloseHandle(hSerial);
+		return 1;
+	}
+	dcbSerialParams.BaudRate = CBR_115200;
+	dcbSerialParams.ByteSize = 8;
+	dcbSerialParams.StopBits = ONESTOPBIT;
+	dcbSerialParams.Parity = NOPARITY;
+	if(SetCommState(hSerial, &dcbSerialParams) == 0)
+	{
+		fprintf(stderr, "Error setting device parameters\n");
+		CloseHandle(hSerial);
+		return 1;
+	}
+	// Intervalles et Timeout de la communication 
+	timeouts.ReadIntervalTimeout = 50;  // Valeur par defaut de la sim900(Modifiable)
+	timeouts.ReadTotalTimeoutConstant = 50;
+	timeouts.ReadTotalTimeoutMultiplier = 10;
+	timeouts.WriteTotalTimeoutConstant = 50;
+	timeouts.WriteTotalTimeoutMultiplier = 10;
+	if(SetCommTimeouts(hSerial, &timeouts) == 0)
+	{
+		fprintf(stderr, "Erreur en configurant les Timeout\n");
+		CloseHandle(hSerial);
+		return 1;
+	}
+	
+	disable_echo();
+	
+	// Intervalles et Timeout de la communication 
+	timeouts.ReadIntervalTimeout = 50;  // Valeur par defaut de la sim900(Modifiable)
+	timeouts.ReadTotalTimeoutConstant = 50;
+	timeouts.ReadTotalTimeoutMultiplier = 10;
+	timeouts.WriteTotalTimeoutConstant = 50;
+	timeouts.WriteTotalTimeoutMultiplier = 10;
+	if(SetCommTimeouts(hSerial, &timeouts) == 0)
+	{
+		fprintf(stderr, "Erreur en configurant les Timeout\n");
+		CloseHandle(hSerial);
+		return 1;
+	}
+}
+//*****************************************Fermeture du port série************************/////
+int close_serial()
+{
+	{   
+		fprintf(stderr, "Closing serial port...");
+		if (CloseHandle(hSerial) == 0)
+		{
+			fprintf(stderr, "Error\n");
+			return 1;
+		}
+		fprintf(stderr, "\n");
+		return 0;
+	}
+}
+//**************Envoie de la commande au module SIM900 et traitement de la réponse********/////
+//  send_cmd(commande,reponse attendu,délai d'attente de la réponse,tampon de réception)
+int send_cmd (unsigned char* cmd,unsigned char* rsp,int TimeOut,char * RX_DATA)
+{
+	#ifdef DEBUG_GSM
+	fprintf(stderr, "--------------------------------------------------------------------------------------- \n");
+	printf("Commande envoye: %s \n", cmd);
+	printf("Reponse attendu: %s \n", rsp);
+    #endif
+	
+	int  post_data_length=1000;
+	int  Reponse=0;
+	int  Compteur_Time_Out=0;
+	int  NoReponse=1;
+	DWORD bytes_written, total_bytes_written = 0;
+
+	if(!WriteFile(hSerial, cmd, 556, &bytes_written, NULL))
+	{
+		fprintf(stderr, "Erreur\n");
+		CloseHandle(hSerial);
+		return 1;
+	}
+	Sleep(100);
+	DWORD bytes_readed;
+	DWORD p_rx_data=0;
+	do{
+		memset(RX_DATA,0,post_data_length * sizeof(*RX_DATA));
+		do{
+			if (ReadFile(hSerial,  
+						bytes_to_read,               
+						1,              
+						&bytes_readed,                 
+						NULL) == 0)              
+			{	
+				return FALSE;
+			}
+
+			else
+			{	
+				if(bytes_readed!=0){
+					
+					if(bytes_to_read<=31){ // Si caractere non imprimable (CR et LF)
+						RX_DATA[p_rx_data]=0; 
+					}
+					else
+					{
+						RX_DATA[p_rx_data]=bytes_to_read[0];
+					}
+					p_rx_data++;
+				}
+				else{Compteur_Time_Out++;Sleep(100);}
+			}
+		}
+		while(bytes_readed!=0);
+		RX_DATA[p_rx_data+1]="\0";
+		p_rx_data=0;
+		//	
+		NoReponse++;
+		printf("Reponse recu:%s apres %d [mS] \n ", RX_DATA);
+		if(strstr(RX_DATA,rsp)!=0){
+			#ifdef DEBUG_GSM
+			printf("Reponse recu:%s apres %d [mS] \n ", RX_DATA,Compteur_Time_Out);
+			#endif
+			Reponse=1; } //Reponse souhaite
+		if(strstr(RX_DATA,"ERROR")!=0){
+			#ifdef DEBUG_GSM
+			printf("Reponse recu:%s  apres %d [mS] \n ", RX_DATA,Compteur_Time_Out); 
+			#endif
+			Reponse=2; } //Error 
+		
+		if (Compteur_Time_Out >= TimeOut)
+		{fprintf(stderr, "TIME OUT context");Reponse=3;}
+}
+	while (Reponse==0);
+	return Reponse;
+}

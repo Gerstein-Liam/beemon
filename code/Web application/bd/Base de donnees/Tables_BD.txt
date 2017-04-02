@@ -1,0 +1,124 @@
+
+-----------------------------------------------------------------
+						TABLE BEEMONS
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+					    "UTILISATEUR  [PREMIERE TABLE A CREER]"
+
+
+CREATE TABLE utilisateur (
+id_user MEDIUMINT NOT NULL AUTO_INCREMENT, 
+username varchar(100) NULL,
+password varchar(100) NULL,
+
+user_desc varchar(100) NULL,
+phone_nb varchar(100) NULL,
+
+latitude FLOAT NOT NULL , longitude FLOAT NOT NULL,
+Primary Key (id_user)
+) ENGINE=InnoDB ; 
+
+
+latitude FLOAT NOT NULL , longitude FLOAT NOT NULL
+
+-----------------------------------------------------------------
+				"POSSEDE GROUPE (RELAIS) [3EME]"
+Table 
+CREATE TABLE possede (
+fk_id_user int(10) NULL, 
+fk_id_groupe int(10) NULL,
+Foreign Key (fk_id_user) references utilisateur(id_user),
+Foreign Key (fk_id_groupe) references relai_groupe(id_groupe)
+) ENGINE=InnoDB ; 
+
+Contraintes 
+ALTER TABLE possede ADD CONSTRAINT c_fk_user FOREIGN KEY (fk_id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE possede ADD CONSTRAINT c_fk_rgroupe FOREIGN KEY (fk_id_groupe) REFERENCES relai_groupe(id_groupe) ON DELETE CASCADE ON UPDATE CASCADE;
+-------------------------------------------------------------------
+						"RELAIS  [2EME]"
+CREATE TABLE IF NOT EXISTS `relai_groupe` (
+id_groupe int(11) NOT NULL AUTO_INCREMENT,
+relaie_desc varchar(100) NOT NULL,
+no_gsm varchar(20) NOT NULL,
+credit int(11) NOT NULL,
+PRIMARY KEY (`id_groupe`)
+) ENGINE=InnoDB  
+
+-----------------------------------------------------------------
+			 "RELAYE (LE RELAIS RELAYE DES RUCHES EQUIPEES)[5EME]"
+Table 
+CREATE TABLE relaye (
+fk_id_groupe int(10) NULL, 
+fk_id_ruche int(10) NULL,
+Foreign Key (fk_id_ruche) references ruche_equipee(id_ruche),
+Foreign Key (fk_id_groupe) references relai_groupe(id_groupe)
+) ENGINE=InnoDB ; 
+
+Contraintes 
+ALTER TABLE relaye ADD CONSTRAINT c_fk_rgroupe_r FOREIGN KEY (fk_id_groupe) REFERENCES relai_groupe(id_groupe) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE relaye ADD CONSTRAINT c_fk_requipee_r FOREIGN KEY (fk_id_ruche) REFERENCES ruche_equipee(id_ruche) ON DELETE CASCADE ON UPDATE CASCADE;
+
+		INSERT INTO `relaye`(`fk_id_groupe`, `fk_id_ruche`) VALUES (20,1)
+-------------------------------------------------------------------
+						"RUCHE EQUIPEE [4EME]" 
+CREATE TABLE ruche_equipee (
+id_ruche int(11) NOT NULL AUTO_INCREMENT,
+ruche_desc varchar(100) NOT NULL,
+adr_mac varchar(20) NOT NULL,
+frequence_collecte int(11) NOT NULL,
+frequence_proposition int(11) NOT NULL,
+PRIMARY KEY (`id_ruche`)
+) ENGINE=InnoDB ;
+
+							REQUETE
+INSERT INTO `ruche_equipee`(`id_ruche`, `ruche_desc`, `adr_mac`, `frequence_collecte`, `frequence_proposition`) VALUES ('','ruche 3 nord','','','')
+
+SELECT ruche_desc FROM ruche_equipee AS p1, relaye AS p2 ,relai_groupe AS p3 WHERE p1.id_ruche = p2.fk_id_ruche AND p3.id_groupe = p2.fk_id_groupe AND p2.fk_id_groupe =20 
+
+UPDATE `ruche_equipee` SET `ruche_desc`='fdfdf',`frequence_collecte`=2,`frequence_proposition`= 4  WHERE id_ruche=
+-------------------------------------------------------------------
+								"ECHANTILLON [5EME]"
+CREATE TABLE echantillon ( 
+id_ech int(10) NULL AUTO_INCREMENT, 
+fk_id_groupe int(10) NULL, 
+unite_physique varchar (10) NOT NULL, 
+valeur_echantillon FLOAT(3), 
+date_echantillon    Datetime, 
+Primary Key (id_ech), 
+Foreign Key (fk_id_groupe) references relai_groupe(id_groupe) ) ENGINE=InnoDB 
+
+										Contraintes
+ALTER TABLE communications ADD CONSTRAINT fk_user_com FOREIGN KEY (fk_id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE ON UPDATE CASCADE;
+										 Requêtes
+SELECT date_echantillon FROM echantillon_mesure WHERE fk_id_groupe=20 ORDER BY date_echantillon DESC 
+
+-------------------------------------------------------------------
+									 "COMMUNICATION"
+Table communications
+Table
+CREATE TABLE communications ( 
+fk_id_user int(10) NULL, 
+fk_id_groupe int(10) NULL, 
+conn_status varchar (10) NOT NULL, 
+id_msg_for_user varchar (100) NOT NULL, 
+id_msg_for_relaie varchar (100) NOT NULL, 
+Foreign Key (fk_id_user) references utilisateur(id_user), 
+Foreign Key (fk_id_groupe) references relai_groupe(id_groupe) ) ENGINE=InnoDB 
+
+Contraintes
+ALTER TABLE communications ADD CONSTRAINT fk_user_com FOREIGN KEY (fk_id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE communications ADD CONSTRAINT fk_group_com FOREIGN KEY (fk_id_groupe) REFERENCES relai_groupe(id_groupe) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-----------------------------------------------------------------
+						GESTION DB
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+			"LISTER ET EFFACER LES CONTRAINTES D'INTEGRITE CREERS"
+select *from information_schema.table_constraints where constraint_schema = 'beemon_bd'
+
+puis vider 
+           "FORCER VIDAGE TABLE UTILISANT CONTRAINTES D'INTEGRITE"
+SET FOREIGN_KEY_CHECKS=0;
+TRUNCATE utilisateur;
+TRUNCATE relai_groupe;
+SET FOREIGN_KEY_CHECKS=1;

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+<gatt in="gatt.xml"/> //Définit le fichier qui définit GATT
+<hardware in="hardware.xml"/> //Définit le fichier de la config mat
+<script in="ssi_com.bgs"/> //Définit le script « application »
+<image out="out.hex"/> //Définit le firmware de 128KB
+<device type="ble112"/> //Définit le type de module
+<boot fw="bootuart"/> //Définit le périphérique pour
+</project> 
+

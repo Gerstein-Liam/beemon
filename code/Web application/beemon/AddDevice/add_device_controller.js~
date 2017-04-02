@@ -1,0 +1,26 @@
+function js_add()
+{
+	var xmlhttp;
+	if (window.XMLHttpRequest)
+	{
+		xmlhttp=new XMLHttpRequest();
+	}
+	else
+	{
+		xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+	}
+
+	xmlhttp.open("POST","./AddDevice/add_device_modele.php",true);
+	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+	xmlhttp.send("no_gsm="+document.forms["addForm"].elements["no_gsm"].value+"&"+"description="+document.forms["addForm"].elements["description"].value);
+
+	xmlhttp.onreadystatechange=function()
+	{
+		if (xmlhttp.readyState==4 && xmlhttp.status==200)
+		{
+			document.getElementById("add_rsp").innerHTML=xmlhttp.responseText;
+		}
+	}
+}
+
+

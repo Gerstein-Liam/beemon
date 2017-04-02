@@ -1,0 +1,29 @@
+{
+    "no_gsm": "0798698124",
+    "reason": "updates",
+    "groupe": [
+        {
+            "ruche": {
+                "mac_adr": "00:07:80:67:07:44",
+                "datedebut": "2014-9-8 13:07:54",
+                "datefin": "2014-9-8 13:08:32",
+                "nbre_echantillon": "6",
+                "mesures_ruche": [
+                    {
+                        "capteur": {
+                            "port": "1",
+                            "mesures_capteur": [
+                                "25.7C",
+                                "25.7C",
+                                "25.7C",
+                                "25.7C",
+                                "25.7C",
+                                "25.7C"
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}

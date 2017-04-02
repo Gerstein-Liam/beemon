@@ -1,0 +1,112 @@
+#--------------------------------------SS1 V1-----------------------------------
+#Auteur: Gerstein Liam
+#Compilation: 1)cd projet
+#             2)..\..\bin\bgbuild.exe project.xml
+#			  3)Update BLE112 avec out.hex
+#-------------------------------------Variables---------------------------------
+dim tmp(5)
+dim ascii(6)
+dim celsius
+dim offset_gatt
+dim a
+dim b
+dim c
+dim connected
+dim offset_f
+#----------------------------------Initialisation-----------------------------
+event system_boot(major ,minor ,patch ,build ,ll_version ,protocol_version ,hw )
+	call gap_set_mode(0,0)						#Stop Advertis,PM3
+	
+	call hardware_set_soft_timer(32768/2,0,0)   #Lance timer collecte
+	offset_gatt=0								
+	
+	call hardware_io_port_write(1,$7,$1)		#Affichage titre
+	call hardware_io_port_config_direction(1,$7)
+	call hardware_spi_transfer(0,11,"\x30\x30\x30\x39\x14\x56\x6d\x70\x0c\x06\x01")
+	call hardware_spi_transfer(0,1,"\x80")
+	call hardware_io_port_write(1,$7,$3)
+	call hardware_spi_transfer(0,16,"    SSI_COM    ")
+	call hardware_io_port_write(1,$7,$1)
+	call hardware_spi_transfer(0,1,"\xc0")
+	call hardware_io_port_write(1,$7,$3)
+	call hardware_spi_transfer(0,16,"Etat:")
+end
+#----------------------------------Collecte------------------------------------
+event hardware_soft_timer(handle)
+	call hardware_adc_read(6,3,0)   #14->Temperature 6->Potentiometre
+end
+#----------------------------------Lecture AD--------------------------------
+event hardware_adc_result(input,value)
+	offset_f=-1500																				
+	celsius = value / 16							# ADC value is 12 MSB											
+	celsius = (10*celsius*1150/2047) * 10/45 + offset_f # Calculate temperature
+													# ADC*V_ref/ADC_max / T_coeff + offset										
+	tmp(0:1)=0								  		#set flags
+												
+	tmp(1:4)=float(celsius, -1)						#set as float
+	
+	a = (celsius / 100)								#2X.X #Extracting desimals from integer
+	b = (celsius / 10) + (a*-10)					#X4.X
+	c = (celsius)      + (a*-100) + (b*-10)			#XX.8
+
+	ascii(0:1) = a + 48 #"2"						#+48 is for desimal -> ascii
+	ascii(1:1) = b + 48 #"4"
+	ascii(2:1) = 46	    #"."
+	ascii(3:1) = c + 48 #"8"
+	ascii(4:1) = 67	    #"C"
+	ascii(5:1) = 32      #espace
+	
+	call hardware_io_port_write(1,$7,$1)          #Affichage valeur
+	call hardware_spi_transfer(0,1,"\xc6")
+	call hardware_io_port_write(1,$7,$3)
+	call hardware_spi_transfer(0,6,ascii(0:5))	
+
+	if offset_gatt<254 then                        #Peut-on encore ecrire?(a modifier)
+		call attributes_write(C1,offset_gatt,6,ascii(0:6))
+		offset_gatt=offset_gatt+6
+	end if
+	
+	if offset_gatt>255 then                        #Mémoire pleine?Moment de deposer?
+		offset_gatt=0								#Oui
+		call gap_set_mode(gap_general_discoverable,gap_directed_connectable) 
+		call hardware_set_soft_timer(0,0,0)  		#Lance adverti,stop timer
+		
+		call hardware_io_port_write(1,$7,$1)
+		call hardware_spi_transfer(0,1,"\xc6")
+		call hardware_io_port_write(1,$7,$3)
+		call hardware_spi_transfer(0,10,"DepotAlert")
+	end if
+	
+end
+
+#----------------------------------Deconnexion-----------------------------
+event connection_disconnected(handle,result)
+	call gap_set_mode(0,0)				     #Stop advertis, commencer PM3
+	call hardware_set_soft_timer(32768/2,0,0)#Relance Timer pour collecte
+	
+	call hardware_io_port_write(1,$7,$1)     #affichage statut
+	call hardware_spi_transfer(0,1,"\xc6")
+	call hardware_io_port_write(1,$7,$3)
+	call hardware_spi_transfer(0,10,"Disconnect")	
+end
+#*****Indication valeur modifié dans Gatt Server par Client GATT **************
+event attributes_value(connection, reason, handle, offset, value_len, value)
+	call hardware_io_port_write(1,$7,$1) 	#affichage statut
+	call hardware_spi_transfer(0,1,"\xc6")
+	call hardware_io_port_write(1,$7,$3)
+	call hardware_spi_transfer(0,8,"Sync&Conf ")
+end
+#************************Connexion etabli#************************
+event connection_status(connection ,flags ,address ,address_type ,conn_interval ,timeout ,latency,bonding)
+	connected = 1
+	call hardware_io_port_write(1,$7,$1)	#affichage statut
+	call hardware_spi_transfer(0,1,"\xc6")
+	call hardware_io_port_write(1,$7,$3)
+	call hardware_spi_transfer(0,6,"connected ")
+end
+
+
+
+
+
+

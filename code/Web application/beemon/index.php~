@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<HTML>
+<head>
+<link rel="stylesheet"  type="text/css" href="style.css" />
+<meta charset="utf-8" />
+
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+<script src="beemon_nav.js"></script>
+<script src="monitor_cmd.js"></script>
+<script src="./CreateAccount/create_account_controller.js"></script>
+<script src="./CheckAccount/check_account_controller.js"></script>
+<script src="./AddDevice/add_device_controller.js"></script>
+<script src="./MonitorBeehives/monitor_beehives_controller.js"></script>
+<script src="./ConsultHistoric/consult_historic_controller.js"></script>	
+
+<title>BEEMON APP</title>
+</head>
+<body>
+	<header>
+	<img class="Image_titre" src="titre_eiafr.jpg" alt="some_text">
+	</header>
+
+	<nav>
+		<ul>
+			<menu type="toolbar">
+			<button type="button" style="width:130px" onclick="refresh_body('register_body')">register</button>
+			<button type="button" style="width:130px" onclick="refresh_body('login_body')">login</button>
+			<button type="button" style="width:130px" onclick="refresh_body('addnewdevice_body')">add new hardware</button>
+			<button type="button" style="width:130px" onclick="refresh_body('setup_body')">Setup hardware</button>
+			<button type="button" style="width:130px" onclick="refresh_body('monitor_body')">Monitor Beehives</button>
+			<button type="button" style="width:130px" onclick="refresh_body('vhistory_body')">Views history</button>
+			</menu>
+		</ul>
+	</nav>
+
+	<section>
+	<div id="server_ack"></div>
+	</section>
+
+	<footer>
+	<p class="footer">EIA-FR - Projet de bachelor 2014</p>
+	</footer>
+</body>
+</html> 
+
+
+
+
+
+	

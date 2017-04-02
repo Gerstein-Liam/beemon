@@ -1,0 +1,109 @@
+///////////////////////////TABLES BEEMONS///////////////////////////////////////////////////////////
+
+-----------------------------------------------------------------
+				   Lister et effacer contraintes
+List contraintes
+select *
+from information_schema.table_constraints
+where constraint_schema = 'beemon_bd'
+
+Ajouter contraintes
+ALTER TABLE possede DROP FOREIGN KEY fk_relaie
+
+
+http://www.dbnewz.com/2010/01/13/cles-etrangeres-et-actions/
+
+Forcer vidage
+SET FOREIGN_KEY_CHECKS=0;
+TRUNCATE utilisateur;
+TRUNCATE relai_groupe;
+SET FOREIGN_KEY_CHECKS=1;
+
+-----------------------------------------------------------------
+				Table utilisateur
+	CREATE TABLE utilisateur (
+	 id_user int(10) NULL AUTO_INCREMENT, 
+	 username varchar(100) NULL,
+	 password varchar(100) NULL,
+	 user_desc varchar(100) NULL,
+	 phone_nb varchar(100) NULL,
+
+	 Primary Key (id_user)
+	) ENGINE=InnoDB ; 
+
+-----------------------------------------------------------------
+				table possède
+Table 
+	CREATE TABLE possede (
+	   fk_id_user int(10) NULL, 
+	   fk_id_groupe int(10) NULL,
+
+
+	  Foreign Key (fk_id_user) references utilisateur(id_user),
+	  Foreign Key (fk_id_groupe) references relai_groupe(id_groupe)
+	) ENGINE=InnoDB ; 
+
+Contraintes 
+	ALTER TABLE possede ADD CONSTRAINT c_fk_user FOREIGN KEY (fk_id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE ON UPDATE CASCADE;
+	ALTER TABLE possede ADD CONSTRAINT c_fk_rgroupe FOREIGN KEY (fk_id_groupe) REFERENCES relai_groupe(id_groupe) ON DELETE CASCADE ON UPDATE CASCADE;
+
+
+
+
+
+-------------------------------------------------------------------
+				Table relais
+				
+	CREATE TABLE IF NOT EXISTS `relai_groupe` (
+	  id_groupe int(11) NOT NULL AUTO_INCREMENT,
+	  relaie_desc varchar(100) NOT NULL,
+	  no_gsm varchar(20) NOT NULL,
+	  credit int(11) NOT NULL,
+	  PRIMARY KEY (`id_groupe`)
+	) ENGINE=InnoDB  
+
+-------------------------------------------------------------------
+				Table communications
+Table
+	CREATE TABLE communications ( 
+	fk_id_user int(10) NULL, 
+	fk_id_groupe int(10) NULL, 
+	conn_status varchar (10) NOT NULL, 
+	id_msg_for_user varchar (100) NOT NULL, 
+	id_msg_for_relaie varchar (100) NOT NULL, 
+	Foreign Key (fk_id_user) references utilisateur(id_user), 
+	Foreign Key (fk_id_groupe) references relai_groupe(id_groupe) ) ENGINE=InnoDB 
+
+Contraintes
+	ALTER TABLE communications ADD CONSTRAI,NT fk_user_com FOREIGN KEY (fk_id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE ON UPDATE CASCADE;
+	ALTER TABLE communications ADD CONSTRAINT fk_group_com FOREIGN KEY (fk_id_groupe) REFERENCES relai_groupe(id_groupe) ON DELETE CASCADE ON UPDATE CASCADE;
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------
+				Mesure
+Table
+	CREATE TABLE echantillon ( 
+        id_ech int(10) NULL AUTO_INCREMENT, 
+        fk_id_groupe int(10) NULL, 
+	unite_physique varchar (10) NOT NULL, 
+	valeur_echantillon FLOAT(3), 
+        date_echantillon    Datetime, 
+      	Primary Key (id_ech), 
+	Foreign Key (fk_id_groupe) references relai_groupe(id_groupe) ) ENGINE=InnoDB 
+
+Contraintes
+	ALTER TABLE communications ADD CONSTRAINT fk_user_com FOREIGN KEY (fk_id_user) REFERENCES utilisateur(id_user) ON DELETE CASCADE ON UPDATE CASCADE;
+	
+
+SELECT date_echantillon FROM echantillon_mesure WHERE fk_id_groupe=20 ORDER BY date_echantillon DESC 
+
+
+
+	
+			

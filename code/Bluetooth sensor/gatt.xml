@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+
+
+<configuration>
+
+	<service uuid="624e957f-cb42-4cd6-bacc-84aeb898f69b" advertise="true">
+        <description>DescriptionSSI</description>
+		
+        <characteristic uuid="e4c937b3-7f6d-41f9-b997-40c561f4453b" id="SSIN">
+            <description>Nom</description>
+            <properties read="true" write="true" />
+        <value variable_length="true" length="6"  ></value>
+        </characteristic>
+        
+        <!-- custom read/write characteristic for getting/setting I/O port status --> 
+        <characteristic uuid="df342b03-53f9-43b4-acb6-62a63ca0615a" id="GRPE">
+            <description>Groupe</description>
+            <properties read="true" write="true" />
+       <value variable_length="true" length="2"  ></value>
+        </characteristic>
+		
+        <!-- custom write-only characteristic for setting mode -->
+        <characteristic uuid="e4c937b3-7f6d-41f9-b997-40c561f4453b" id="SGRP">
+            <description>Sous-groupe</description>
+            <properties read="true" write="true" />
+        <value variable_length="true" length="2"  ></value>
+        </characteristic>
+</service>
+
+
+<service uuid="624e957f-cb42-4cd6-bacc-84aeb898f69b" advertise="true">
+        <description>Attributs de fonctionnement</description>
+		      <!-- custom write-only characteristic for setting mode -->
+        <characteristic uuid="e4c937b3-7f6d-41f9-b997-40c561f4453b" id="_DEP">
+            <description>Heure dernier Depot </description>
+            <properties read="true" write="true" />
+        <value type="hex" length="4"  ></value>
+        </characteristic>
+        
+        <!-- custom read/write characteristic for getting/setting I/O port status --> 
+        <characteristic uuid="df342b03-53f9-43b4-acb6-62a63ca0615a" id="F_INT">
+            <description>FrequenceInteraction</description>
+            <properties read="true" write="true" />
+           <value type="hex" length="1"  ></value>
+        </characteristic>
+		
+        <!-- custom write-only characteristic for setting mode -->
+        <characteristic uuid="e4c937b3-7f6d-41f9-b997-40c561f4453b" id="F_ACQ">
+            <description>FrequenceAcquisition</description>
+            <properties read="true" write="true" />
+         <value type="hex" length="1"  ></value>
+        </characteristic>
+		
+		
+</service>
+	
+	
+<service uuid="624e957f-cb42-4cd6-bacc-84aeb898f69b" advertise="true">
+        <description>PORT 1</description>
+		
+		       <!-- custom write-only characteristic for setting mode -->
+        <characteristic uuid="e4c937b3-7f6d-41f9-b997-40c561f4453b" id="C1CO">
+            <description>Configuration</description>
+            <properties read="true" write="true" />
+        <value variable_length="true" length="10"  ></value>
+        </characteristic>
+        
+        <!-- custom read/write characteristic for getting/setting I/O port status --> 
+        <characteristic uuid="df342b03-53f9-43b4-acb6-62a63ca0615a" id="C1VC">
+            <description>ValeurCritique</description>
+            <properties read="true" write="true" indicate="true" />
+       <value variable_length="true" length="2"  ></value>
+        </characteristic>
+		
+        <!-- custom write-only characteristic for setting mode -->
+        <characteristic uuid="e4c937b3-7f6d-41f9-b997-40c561f4453b" id="C1T1">
+            <description>Port1_Tampon1</description>
+            <properties read="true" write="true" />
+        <value variable_length="true" length="255"  ></value>
+        </characteristic>
+        
+        <!-- custom read/write characteristic for getting/setting I/O port status --> 
+        <characteristic uuid="df342b03-53f9-43b4-acb6-62a63ca0615a" id="C1T2">
+            <description>Port1_Tampon2</description>
+            <properties read="true" write="true" />
+       <value variable_length="true" length="255"  ></value>
+        </characteristic>
+</service>
+
+
+
+
+
+	
+<service uuid="624e957f-cb42-4cd6-bacc-84aeb898f69b" advertise="true">
+        <description>Port2</description>
+		
+		       <!-- custom write-only characteristic for setting mode -->
+        <characteristic uuid="e4c937b3-7f6d-41f9-b997-40c561f4453b" id="C2CO">
+            <description>Configuration</description>
+            <properties read="true" write="true" />
+        <value variable_length="true" length="10"  ></value>
+        </characteristic>
+        
+        <!-- custom read/write characteristic for getting/setting I/O port status --> 
+        <characteristic uuid="df342b03-53f9-43b4-acb6-62a63ca0615a" id="C2VC">
+            <description>ValeurCritique</description>
+            <properties read="true" write="true" />
+       <value variable_length="true" length="2"  ></value>
+        </characteristic>
+		
+        <!-- custom write-only characteristic for setting mode -->
+        <characteristic uuid="e4c937b3-7f6d-41f9-b997-40c561f4453b" id="C2T1">
+            <description>Port2_Tampon1</description>
+            <properties read="true" write="true" />
+        <value variable_length="true" length="255"  ></value>
+        </characteristic>
+        
+        <!-- custom read/write characteristic for getting/setting I/O port status --> 
+        <characteristic uuid="df342b03-53f9-43b4-acb6-62a63ca0615a" id="C2T2">
+            <description>Port2_Tampon2</description>
+            <properties read="true" write="true" />
+       <value variable_length="true" length="255"  ></value>
+        </characteristic>
+</service>
+	
+	
+<service uuid="624e957f-cb42-4cd6-bacc-84aeb898f69b" advertise="true">
+		<description>Port3</description>
+		
+		       <!-- custom write-only characteristic for setting mode -->
+        <characteristic uuid="e4c937b3-7f6d-41f9-b997-40c561f4453b" id="C3CO">
+            <description>Configuration</description>
+            <properties read="true" write="true" />
+        <value variable_length="true" length="10"  ></value>
+        </characteristic>
+        
+        <!-- custom read/write characteristic for getting/setting I/O port status --> 
+        <characteristic uuid="df342b03-53f9-43b4-acb6-62a63ca0615a" id="C3VC">
+            <description>ValeurCritique</description>
+            <properties read="true" write="true" indicate="true" />
+       <value variable_length="true" length="2"  ></value>
+        </characteristic>
+		
+        <!-- custom write-only characteristic for setting mode -->
+        <characteristic uuid="e4c937b3-7f6d-41f9-b997-40c561f4453b" id="C3T1">
+            <description>Port3_Tampon1</description>
+            <properties read="true" write="true" />
+        <value variable_length="true" length="255"  ></value>
+        </characteristic>
+        
+        <!-- custom read/write characteristic for getting/setting I/O port status --> 
+        <characteristic uuid="df342b03-53f9-43b4-acb6-62a63ca0615a" id="C3T2">
+            <description>Port3_Tampon2</description>
+            <properties read="true" write="true" />
+       <value variable_length="true" length="255"  ></value>
+        </characteristic>
+</service>
+	
+			
+<service uuid="624e957f-cb42-4cd6-bacc-84aeb898f69b" advertise="true">
+		<description>PORTE</description>
+		
+		       <!-- custom write-only characteristic for setting mode -->
+        <characteristic uuid="e4c937b3-7f6d-41f9-b997-40c561f4453b" id="DOOR">
+            <description>Etat</description>
+            <properties read="true" write="true" />
+        <value  length="2"  ></value>
+        </characteristic>
+        
+</service>
+
+
+<service uuid="624e957f-cb42-4cd6-bacc-84aeb898f69b" advertise="true">
+		<description>CompteurEntreesSorties</description>
+		
+		       <!-- custom write-only characteristic for setting mode -->
+        <characteristic uuid="e4c937b3-7f6d-41f9-b997-40c561f4453b" id="COMP">
+            <description>Etat</description>
+            <properties read="true" write="true" />
+        <value  length="2"  ></value>
+        </characteristic>
+        
+</service>
+
+
+
+
+<service uuid="624e957f-cb42-4cd6-bacc-84aeb898f69b" advertise="true">
+        <description>Statut configuration</description>
+        <!-- custom write-only characteristic for setting mode -->
+        <characteristic uuid="e4c937b3-7f6d-41f9-b997-40c561f4453b" id="CONF">
+            <description>Statut configuration</description>
+            <properties read="true" write="true" />
+        <value variable_length="true" length="4"  ></value>
+        </characteristic>
+		
+		
+		   <description>Statut depot</description>
+        <!-- custom write-only characteristic for setting mode -->
+        <characteristic uuid="e4c937b3-7f6d-41f9-b997-40c561f4453b" id="DEPS">
+            <description>Status depot</description>
+            <properties read="true" write="true"  indicate="true" />
+        <value variable_length="true" length="4"  ></value>
+        </characteristic>
+</service>
+
+	
+</configuration>

@@ -1,0 +1,142 @@
+header
+{margin-left: 165px;
+  width:790px;
+	border: 1px solid black;
+	border-radius: 10px;
+}
+
+.Image_titre
+{
+margin-left: 30px;
+	
+}
+
+
+
+
+
+
+p
+{
+text-align: left;
+color: black;
+}
+
+
+p.footer
+{
+margin-left: 270px;
+
+
+
+font-size: 0,3px;
+color: black;
+}
+
+
+.nav_monitor ul
+{
+float: left;
+width: 50px;
+margin-left: 0px;
+	
+}
+
+menu
+{
+margin-top:2px;
+margin-left:-075px;
+float: left;
+	width: 100px;
+
+}
+
+button{
+	
+	margin-left:0px;
+	
+}
+
+nav
+{
+margin-top: 10px;
+margin-left:13px;
+float: left;
+width: 140px;
+height: 400px;
+border: 1px solid black;
+border-radius: 10px;
+
+}
+
+
+
+
+
+
+#section_content{
+margin-left: 10px;
+margin-top: 10px;
+	}
+
+
+
+#setup_ruche_setup_panel_content_view{
+display:inline-block;
+width:300px;
+float:left;
+	margin-top: 54px;
+
+
+	}
+
+#setup_ruche_selector_panel_content_view{
+display:inline-block;
+width:300px;
+float:left;
+
+
+}
+
+
+
+
+section
+{
+margin-left: 165px;
+	margin-top: 10px;
+width: 790px;
+height: 400px;
+border: 1px solid black;
+	border-radius: 10px;
+
+
+
+
+
+
+}
+
+
+footer
+{
+margin-left: 170px;
+float: bottom;
+width: 800px;
+}
+
+
+
+
+
+table {
+margin-top:20px;
+border-collapse: collapse;
+border: thin solid black;
+width: 100%;
+}
+td, tr {
+border: thin solid black;
+width: 50%;
+}
+

@@ -1,0 +1,35 @@
+///////////////////////////////Commandes////////////////////////////////////////////////////////
+Configuration effectuée:  		    DONE->  444f4e45           Attribut 70 
+Retrait des mesures effectuée:  	DEPD->  44455044 		   Attribut 73
+
+//////////////////Configuration général/////////////////
+Frequence de collecte :            Valeur numérique de 2 byte max   Attribut 19  
+Frequence de proposition :         Valeur numérique de 2 byte max   Attribut 16
+
+/////////////////////////////////////Configuration capteurs////////////////////////////////////
+Etiquette de configuration:        US/UN  |   I2/AN    |  TE/HU   (POUR LE MOMENT) 
+
+Capteur I2C température :USI2TE   555349325445
+Capteur I2C humidité    :USI2HU   555349324855
+
+Attributs de configuration des capteur  :  
+Capteur 1         Attributs 23
+Capteur 2		  Attributs 36
+Capteur 3		  Attributs 49
+											
+/////////////////////////////////////Retrait des mesures////////////////////////////////////
+											
+Attributs de stockage des mesures       :   
+Capteur 1        Tampon1 Attributs 29 Tampon2 Attributs 32 
+Capteur 2        Tampon1 Attributs 42 Tampon2 Attributs 45 
+Capteur 3        Tampon1 Attributs 55 Tampon2 Attributs 58 
+											
+											
+	/////////////////////////////////////Utilisation///////////////////////////////////
+											
+Configurations:   1)Entrée les valeur de configuration dans les bons attributs 
+				  2)Indiquer au SSI que la configuration à été effectuée DONE)
+Retrait:  		  1)Lire les attributs de stockage 
+				  2)Indiquer l'heure du retrait au SSI  : Entree valeur 4 Byte "2103" dans attributs 13 (SYNC)
+				  3)Indiquer au SSI que le retrait à été effectué (DEPD)
+		

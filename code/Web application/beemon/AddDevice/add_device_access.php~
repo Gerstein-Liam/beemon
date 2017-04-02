@@ -1,0 +1,22 @@
+<?php
+try {
+  session_start();
+} catch(ErrorExpression $e) {
+	echo "Pls log in ";
+}  
+
+if ($_SESSION['username']){
+	  $doc = new DOMDocument();
+	  $doc->loadHTMLFile("add_device_view.html");
+      echo $doc->saveHTML();	
+}
+?>
+
+
+
+
+
+
+
+
+

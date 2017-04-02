@@ -1,0 +1,71 @@
+
+
+
+-----------------------------------------------------------------
+				Table utilisateur
+CREATE TABLE utilisateur (
+ id_user int(10) NULL AUTO_INCREMENT, 
+ username varchar(100) NULL,
+ password varchar(100) NULL,
+ user_desc varchar(100) NULL,
+ phone_nb varchar(100) NULL,
+
+ Primary Key (id_user)
+) ENGINE=InnoDB ; 
+
+
+-----------------------------------------------------------------
+				association posséde
+Table POSSEDE
+
+CREATE TABLE possede (
+   id_user (10) NULL, 
+     id_groupe int(10) NULL,
+
+
+  Foreign Key (id_user) references utilisateur(id_user),
+  Foreign Key (id_groupe) references relai_groupe(id_groupe)
+) ENGINE=InnoDB ; 
+
+
+
+-------------------------------------------------------------------
+				Table relais
+CREATE TABLE IF NOT EXISTS `relai_groupe` (
+  id_groupe int(11) NOT NULL AUTO_INCREMENT,
+  relaie_desc varchar(100) NOT NULL,
+  no_gsm varchar(20) NOT NULL,
+  credit int(11) NOT NULL,
+  PRIMARY KEY (`id_groupe`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
+
+
+
+-------------------------------------------------------------------
+				Table communications
+CREATE TABLE communications (
+   id_user (10) NULL, 
+     id_groupe int(10) NULL,
+     conn_status varchar (10) NOT NULL,
+     id_msg_for_user varchar (100) NOT NULL,
+     id_msg_for_relaie varchar (100) NOT NULL,
+     
+     Foreign Key (id_user) references utilisateur(id_user),
+     Foreign Key (id_groupe) references relai_groupe(id_groupe)
+) ENGINE=InnoDB ; 
+
+
+
+
+
+Tabke ruce
+
+CREATE TABLE ruche_equipee (
+ id_ruche int(10) NULL AUTO_INCREMENT, 
+ mac_adr varchar(100) NULL,
+ description varchar(100) NULL,
+
+ Primary Key (id_ruche),
+ Foreign Key (id_groupe) references relai_groupe(id_groupe)
+ ON DELETE CASCADE
+) ENGINE=InnoDB ; 

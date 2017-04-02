@@ -1,0 +1,16 @@
+requete depot
+
+
+
+Récuperer ID_relai a partir du numéro GSM (faire alias)	
+    SELECT `id_groupe` FROM `relai_groupe` WHERE no_gsm=0798698124 
+
+Enregistrement echantillon
+INSERT INTO `echantillon`(`id_ech`, `fk_id_groupe`, `unite_physique`, `valeur_c`, `valeur_n`, `date_c`, `date_d`, `value_c`, `value_f`) VALUES ('',3,'','','','','','','3')
+
+
+
+
+Afficher
+
+

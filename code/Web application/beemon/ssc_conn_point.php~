@@ -1,0 +1,178 @@
+
+<?php include 'connect_beemon_bd.php'?>
+
+<?php
+class requests_handler{
+	public $mysqli;
+
+	public $configuration_ssc = array(
+	"reason" => "",
+	"no_gsm"   => "",
+	"config"   => array(
+	"f_polling"=>""
+	));
+	
+	function ConnectToDatabase($mysqli)
+	{	
+		$this->mysqli=$mysqli;
+		
+		}			  
+
+	function CreateJSONfromBody()
+	{
+		$this->rx_json = json_decode(stripslashes(file_get_contents("php://input")),true);
+		
+	}
+	
+	function GetRelaisInfos() { 
+		$this->configuration_ssc["reason"]=$this->rx_json['reason'];
+		$this->configuration_ssc["no_gsm"]=$this->rx_json['no_gsm'];
+	}
+
+
+	function DoUpdates() { 
+		$query= "SELECT id_groupe FROM `relai_groupe` WHERE no_gsm='" .  $this->configuration_ssc["no_gsm"] . "'";
+		$result = $this->mysqli->query($query) or die($this->mysqli->error.__LINE__);
+		
+		if($result->num_rows > 0)
+		{
+			while($row = $result->fetch_assoc()) 
+			{$id_groupe=$row["id_groupe"];}
+			
+			
+			
+			
+			
+			
+			
+			foreach($this->rx_json['groupe'] as $groupe=>$ruche){ 
+
+				foreach($ruche as $ruche=>$data_ruche){
+				
+					$mac_adresse=$data_ruche['mac_adr'];
+					$nombre_echantillons=$data_ruche['nbre_echantillon'];
+					$date_debut_echantillon=$data_ruche['datedebut'];
+					$date_fin_echantillon=$data_ruche['datefin'];
+
+					
+		//$query="SELECT `frequence_collecte`,`frequence_proposition` FROM `ruche_equipee` WHERE `adr_mac`= '00:07:80:67:07:44'";
+		$query="SELECT `frequence_collecte`,`frequence_proposition` FROM `ruche_equipee` WHERE `adr_mac`= '" .$mac_adresse . "'";
+				    $result = $this->mysqli->query($query) or die($this->mysqli->error.__LINE__);
+					
+					if($result->num_rows > 0) {
+						while($row = $result->fetch_assoc()) {
+						
+				     echo '{';
+				     echo '"f_collecte" : "' . $row['frequence_collecte'] .'" ' ;
+  				     echo ',' ;
+				      echo '"f_proposition" : "' . $row['frequence_proposition'] .'" ' ;
+  				     echo '}';
+
+				    
+					}
+					}
+									
+				
+					echo "  Date debut: " . 	$date_debut_echantillon . "  Date fin: " . 	$date_fin_echantillon . "  Nombre echantillons: " . $nombre_echantillons;
+                    echo "  Echantillons: ";
+					//	echo $date_debut_echantillon;
+					$format = 'Y-m-d H:i:s';
+					$date_debut_ech = DateTime::createFromFormat($format,$date_debut_echantillon);
+					//	echo "Format: $format; " . $date->format('i') . "\n";
+                    $date_fin_ech = DateTime::createFromFormat($format,$date_fin_echantillon);                                   
+					$diff =  $date_fin_ech->getTimestamp() -  $date_debut_ech->getTimestamp();
+						//$interval =date_diff($date_debut_ech,$date_fin_ech);
+					//echo $interval->format('%R%a days');
+					$diff=$diff/6;
+					$diff=round($diff);
+					$interval="PT".$diff."S";
+				
+			
+					$date_echantillon=$date_debut_ech;
+
+			
+				
+					
+			
+					foreach($data_ruche['mesures_ruche'] as $mesures=>$capteurs){ 
+						foreach($capteurs as $capteurs=>$capteur){ 
+
+	                                          
+							
+							foreach($capteur['mesures_capteur'] as $mes_capteur=>$valeur){ 
+								
+								
+						    	$date_echantillon ->add(new DateInterval($interval));
+								$date_echantillon_s = $date_echantillon->format('Y-m-d H:i:s');
+							//	echo $date_echantillon_s;
+					
+								
+							//	$date_echantillon=$annee."-".$mois."-".$jour." ".$heure.":".$minutes.":".$seconde;
+							//   echo  $valeur . "  ";
+								
+								
+							   $query="INSERT INTO `echantillon_mesure`(`id_ech`, `fk_id_groupe`, `unite_physique`, `valeur_echantillon`, `date_echantillon`) VALUES ('','" .  $id_groupe . "','','" .  $valeur . "', '" .  $date_echantillon_s . "')";
+							   $result = $this->mysqli->query($query) or die($this->mysqli->error.__LINE__);
+								
+								
+								
+							
+								
+							}
+						}
+					} 
+				}
+			}
+			
+
+			$query= "SELECT * FROM `requests_handlers` WHERE fk_id_groupe='" .  $id_groupe . "'";
+			$result = $this->mysqli->query($query) or die($this->mysqli->error.__LINE__);
+			if($result->num_rows > 0)
+			{
+				while($row = $result->fetch_assoc()) 
+				{
+				
+				
+				
+				//echo "need_u";
+				
+				
+				
+				}
+				
+				
+				
+				$query="UPDATE `requests_handlers` SET `conn_status`='conn' WHERE fk_id_groupe='" .  $id_groupe . "'";
+				$result = $this->mysqli->query($query) or die($this->mysqli->error.__LINE__);
+			}
+			else
+			{
+				//echo "no need you ";
+			}
+		}
+		else
+		{
+			//echo "no need you ";
+		}
+	}
+}
+
+?>
+<?php
+error_reporting(0);
+
+
+
+$requests_h = new requests_handler();
+$requests_h->ConnectToDatabase($mysqli);
+
+$requests_h->CreateJSONfromBody();
+$requests_h->GetRelaisInfos();
+
+if($requests_h->configuration_ssc["reason"]=="updates")
+{
+	$requests_h->DoUpdates();
+
+}
+?>
+			

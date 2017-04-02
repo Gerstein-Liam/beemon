@@ -1,0 +1,52 @@
+function refresh_body(command)
+{
+	var xmlhttp;
+	if (window.XMLHttpRequest)
+	{
+		xmlhttp=new XMLHttpRequest();
+	}
+	else
+	{
+		xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+	}
+
+	switch(command) {
+	case "register_body":
+		xmlhttp.open("POST","./CreateAccount/create_account_view.php",true);
+		break;
+	case "login_body":
+		xmlhttp.open("POST","./CheckAccount/check_account_view.php",true);
+		break;
+	case "addnewdevice_body":
+		xmlhttp.open("POST","./AddDevice/add_device_access.php",true);
+		break;
+	case "setup_body":
+		xmlhttp.open("POST","/MonitorBeehives/monitor_beehives_access.php",true);
+		break;
+	case "monitor_body":
+		
+	xmlhttp.open("POST","./SetupDevice/setup_device_access.php",true);
+
+		break;
+	case "vhistory_body":
+		xmlhttp.open("POST","./ConsultHistoric/consult_historic_access.php",true);
+		break;
+
+        case "visitor_body":
+		xmlhttp.open("POST","./Visiteur/visitor.php",true);
+		break;
+		
+	} 
+
+	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+	xmlhttp.send("name="+command);
+
+	xmlhttp.onreadystatechange=function()
+	{
+		if (xmlhttp.readyState==4 && xmlhttp.status==200)
+		{
+			document.getElementById("server_ack").innerHTML=xmlhttp.responseText;
+		}
+	}
+
+}

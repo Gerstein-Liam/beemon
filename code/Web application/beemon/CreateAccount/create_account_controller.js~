@@ -1,0 +1,27 @@
+function js_submit()
+{
+	var xmlhttp;
+	if (window.XMLHttpRequest)
+	{
+		xmlhttp=new XMLHttpRequest();
+	}
+	else
+	{
+		xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	
+	xmlhttp.open("POST","reg_check.php",true);
+	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+	xmlhttp.send("username="+document.forms["myForm"].elements["username"].value+"&"+"password="+document.forms["myForm"].elements["password"].value+"&"+"repeated_password="+document.forms["myForm"].elements["repeated_password"].value);
+
+	xmlhttp.onreadystatechange=function()
+	{
+		if (xmlhttp.readyState==4 && xmlhttp.status==200)
+		{
+			document.getElementById("reg_rsp").innerHTML=xmlhttp.responseText;
+		}
+	}
+}
+
+
+

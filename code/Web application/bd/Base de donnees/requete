@@ -1,0 +1,97 @@
+//////////////////////////////Requete coté client///////////////////////////////////////
+
+------------------------------------------------------------------------------------------------------------------------------------------
+									Register
+Vérifier si existe déja
+	"SELECT username FROM `utilisateur` WHERE username='" . $user . "'";
+Créer utilisateur
+        "INSERT INTO `utilisateur`(`id_user`, `username`, `password`) VALUES ('','" . $user . "','" . $pass . "')";
+
+------------------------------------------------------------------------------------------------------------------------------------------
+									Login
+Vérifier si mot de passe et utilisateur juste
+      "SELECT * FROM `utilisateur` WHERE username='" . $user . "'&&password='" . $pass . "'"
+	  
+------------------------------------------------------------------------------------------------------------------------------------------
+									Add new hardware	  
+Ajouter matériel dans base de donnée
+	  "INSERT INTO `relai_groupe`(`id_groupe`, `relaie_desc`, `no_gsm`, `credit`) VALUES ('','" . $desc . "','" . $no_gsm . "',3)";	  
+Récuperer ID groupe par rapport au No GSM
+	  "SELECT id_groupe FROM `relai_groupe` WHERE no_gsm='" . $no_gsm . "'";	  
+Récuperer ID groupe par rapport au User (Session) 
+	   "SELECT id_user FROM `utilisateur` WHERE username='" . $user . "'";
+Associer matériel a l'utilisateur
+	"INSERT INTO `possede`(`fk_id_user`, `fk_id_groupe`) VALUES (" . $id_user . "," . $id_grp . ")";
+	
+		
+------------------------------------------------------------------------------------------------------------------------------------------
+									Setup	
+ON LOAD: Récupérer tout les matériel associé a l'utilasateur
+"SELECT relaie_desc,no_gsm FROM relai_groupe AS p1, possede AS p2 ,utilisateur AS p3 WHERE p1.id_groupe = p2.fk_id_groupe AND p3.id_user = p2.fk_id_user AND p2.fk_id_user =$id_user";
+
+         
+UTILISATEUR->1ER ETAPE :DEMANDE AU SSC DE SE CONNECTER
+
+SSC->2eme etape: LE SSC va voir si on a besoin de lui
+		
+Récuperer ID_relai a partir du numéro GSM (faire alias)	
+    SELECT `id_groupe` FROM `relai_groupe` WHERE no_gsm=0798698124 
+
+Recupère toute les connexion le concernant
+    SELECT * FROM `communications` WHERE fk_id_groupe=3
+		
+Indique que connecté
+    UPDATE `communications` SET `conn_status`='conn' WHERE fk_id_groupe=3
+    $sql = "UPDATE `communications` SET `conn_status`=\'conn\' WHERE fk_id_groupe=3";
+    $sql = "DELETE FROM `communications` WHERE fk_id_user = 3 AND fk_id_groupe=10";
+ 
+DELETE  FROM `communications` WHERE fk_id_user = 3 AND fk_id_groupe=10
+			
+		
+		
+		
+		
+		
+INSERT INTO `utilisateur`(`id_user`, `username`, `pass`) VALUES ('',"mout","dijon")
+
+
+
+
+Creer relais
+$sql = "INSERT INTO `relai_groupe`(`id_groupe`, `description`, `no_gsm`, `credit`) VALUES (\'\',\"groupe_sud\",\"078432432\",20)";
+
+GEt all relais of user A
+SELECT no_gsm FROM relai_groupe AS p1, possede AS p2 ,utilisateur AS p3 WHERE p1.id_groupe = p2.id_groupe AND p3.id_user = p2.id_user 
+
+
+
+ADD
+
+   Insérer nouveau ssc
+	"INSERT INTO `relai_groupe`(`id_groupe`, `description`, `no_gsm`, `credit`) VALUES (\'\',\'ruche sud\',\'089999999\',3)";
+	INSERT INTO `relai_groupe`(`id_groupe`, `description`, `no_gsm`, `credit`) VALUES ('','sud','0600',2)
+
+GEt id SSC
+	"SELECT id_groupe FROM `relai_groupe` WHERE no_gsm=0600";
+	"SELECT id_groupe FROM `relai_groupe` WHERE no_gsm=0600";
+
+GEt id_user avec session User
+SELECT id_user FROM `utilisateur` WHERE username='liam' 
+ "SELECT id_user FROM `utilisateur` WHERE username=\'liam\'";
+
+Insert possede
+"INSERT INTO `possede`(`id_user`, `id_groupe`) VALUES (1,1)";
+
+REcuperer
+
+
+
+SELECT value_f FROM `echantillon` WHERE fk_id_groupe=20 ORDER BY id_ech
+
+SELECT 'description',no_gsm FROM relai_groupe AS p1, possede AS p2 ,utilisateur AS p3 WHERE p1.id_groupe = p2.id_groupe AND p3.id_user = p2.id_user 
+$sql = "SELECT \'description\',no_gsm FROM relai_groupe AS p1, possede AS p2 ,utilisateur AS p3 WHERE p1.id_groupe = p2.id_groupe AND p3.id_user = p2.id_user ";
+
+
+INSERT INTO `echantillon`(`id_ech`, `fk_id_groupe`, `unite_physique`, `valeur_c`, `valeur_n`, `date_c`, `date_d`, `value_c`, `value_f`) VALUES ('',20,'','','','',"2014-01-01 20:50:00",'',20.5)
+
+ "SELECT \'description\',no_gsm FROM relai_groupe AS p1, possede AS p2 ,utilisateur AS p3 WHERE p1.id_groupe = p2.id_groupe AND p3.id_user = p2.id_user AND p2.id_user =4";
